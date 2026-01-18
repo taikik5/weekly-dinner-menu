@@ -159,14 +159,29 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 
 リポジトリの Settings → Secrets and variables → Actions で以下のシークレットを設定：
 
-| シークレット名 | 説明 |
-|--------------|------|
-| `NOTION_TOKEN` | Notion Integration トークン |
-| `DB_ID_PROPOSED` | 提案メニューテーブルのID |
-| `DB_ID_RAW` | 実績入力テーブルのID |
-| `DB_ID_STRUCTURED` | 実績履歴テーブルのID |
-| `OPENAI_API_KEY` | OpenAI APIキー |
-| `SLACK_WEBHOOK_URL` | Slack Webhook URL |
+| シークレット名 | 必須 | 説明 |
+|--------------|:----:|------|
+| `NOTION_TOKEN` | ✅ | Notion Integration トークン |
+| `DB_ID_PROPOSED` | ✅ | 提案メニューテーブルのID |
+| `DB_ID_RAW` | ✅ | 実績入力テーブルのID |
+| `DB_ID_STRUCTURED` | ✅ | 実績履歴テーブルのID |
+| `OPENAI_API_KEY` | ✅ | OpenAI APIキー |
+| `SLACK_WEBHOOK_URL` | ✅ | Slack Webhook URL |
+| `USER_DIETARY_PREFERENCES` | - | 食事の好み・制限（プライベート情報用、下記参照） |
+
+#### プライベートな食事の好み・制限を設定する
+
+アレルギー、健康状態、家族構成などのプライバシーに関わる情報は、公開リポジトリのコードに直接書かずに **GitHub Secrets** で管理できます。
+
+**設定例**（`USER_DIETARY_PREFERENCES` シークレットに登録）：
+```
+- 妊婦がいるため生魚・生肉は避ける\n- 子供が食べやすい味付けにする\n- 辛いものは控える\n- 調理時間は30分以内
+```
+
+**注意点**：
+- 改行は `\n` で表現してください
+- 設定しない場合はデフォルトの汎用的な好みが使用されます
+- ローカル実行時は `.env` ファイルに記載します（`.env` は `.gitignore` で除外済み）
 
 ---
 
@@ -223,17 +238,37 @@ python -m src.main daily
 
 ## 食事の好みをカスタマイズ
 
-`config/settings.py` の `USER_DIETARY_PREFERENCES` を編集して、献立生成の好みを設定できます：
+献立生成時に考慮される好み・制限を設定できます。設定方法は 2 通りあります。
+
+### 方法 1: 環境変数で設定（推奨）
+
+プライバシーに関わる情報（アレルギー、健康状態、家族構成など）を含む場合はこちらを推奨します。
+
+**ローカル実行の場合**（`.env` ファイル）：
+```bash
+# .env ファイルに追加
+USER_DIETARY_PREFERENCES="- 妊婦がいるため生魚・生肉は避ける\n- 子供が食べやすい味付け\n- 辛いものは控える"
+```
+
+**GitHub Actions の場合**（GitHub Secrets）：
+1. Settings → Secrets and variables → Actions
+2. `USER_DIETARY_PREFERENCES` という名前で登録
+3. 改行は `\n` で表現
+
+### 方法 2: 設定ファイルを直接編集
+
+汎用的な好み（公開しても問題ない内容）の場合は、`config/settings.py` の `_DEFAULT_DIETARY_PREFERENCES` を編集できます。
 
 ```python
-USER_DIETARY_PREFERENCES = """
-- 魚の頻度を週3回以上に増やす
+_DEFAULT_DIETARY_PREFERENCES = """
 - 野菜を毎食必ず1品は入れる
-- 子供も食べるので、辛すぎる料理は避ける
 - できるだけ季節の食材を使う
 - 調理時間は30分以内で作れるものが望ましい
+- バランスの良い献立を心がける
 """
 ```
+
+**優先順位**: 環境変数 `USER_DIETARY_PREFERENCES` が設定されている場合はそちらが優先されます。
 
 ---
 

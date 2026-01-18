@@ -47,15 +47,32 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 
 # =============================================================================
-# User Dietary Preferences (ユーザーが自由に編集可能)
+# User Dietary Preferences (ユーザーの食事の好み・制限)
 # =============================================================================
-USER_DIETARY_PREFERENCES = """
-- 魚の頻度を週3回以上に増やす
+# 環境変数 USER_DIETARY_PREFERENCES から読み取ります。
+# 設定されていない場合はデフォルト値（汎用的なサンプル）を使用します。
+#
+# ⚠️ プライバシーに関わる情報（アレルギー、健康状態、家族構成など）は
+#    GitHub Secrets に設定することで、公開リポジトリでも安全に管理できます。
+#
+# 設定例（.env または GitHub Secrets）:
+#   USER_DIETARY_PREFERENCES="- 野菜を多めに\n- 調理時間は30分以内"
+#
+# 改行は \n で表現してください。
+_DEFAULT_DIETARY_PREFERENCES = """
 - 野菜を毎食必ず1品は入れる
-- 子供も食べるので、辛すぎる料理は避ける
 - できるだけ季節の食材を使う
 - 調理時間は30分以内で作れるものが望ましい
+- バランスの良い献立を心がける
 """
+
+# 環境変数から取得（改行文字 \n を実際の改行に変換）
+_raw_preferences = os.getenv("USER_DIETARY_PREFERENCES", "")
+if _raw_preferences:
+    # \n を実際の改行に変換
+    USER_DIETARY_PREFERENCES = _raw_preferences.replace("\\n", "\n")
+else:
+    USER_DIETARY_PREFERENCES = _DEFAULT_DIETARY_PREFERENCES
 
 # =============================================================================
 # Menu Generation Settings

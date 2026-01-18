@@ -40,6 +40,7 @@ jobs:
           DB_ID_STRUCTURED: ${{ secrets.DB_ID_STRUCTURED }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          USER_DIETARY_PREFERENCES: ${{ secrets.USER_DIETARY_PREFERENCES }}
         run: |
           if [ -n "${{ github.event.inputs.reference_date }}" ]; then
             python -m src.main weekly --date "${{ github.event.inputs.reference_date }}"

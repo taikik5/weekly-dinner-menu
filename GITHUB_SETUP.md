@@ -45,16 +45,17 @@ GitHub Actions で使用する環境変数は、すべて **GitHub Secrets** と
 
 ### 登録するシークレット一覧
 
-以下の 6 つのシークレットを登録してください：
+以下のシークレットを登録してください（✅ は必須、オプションは任意）：
 
-| Secret Name | 値 | 説明 |
-|------------|------|------|
-| `NOTION_TOKEN` | `secret_xxxx...` | Notion Integration トークン |
-| `DB_ID_PROPOSED` | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` | 提案メニューテーブルのID（32文字） |
-| `DB_ID_RAW` | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` | 実績入力テーブルのID（32文字） |
-| `DB_ID_STRUCTURED` | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` | 実績履歴テーブルのID（32文字） |
-| `OPENAI_API_KEY` | `sk-xxxx...` | OpenAI API キー |
-| `SLACK_WEBHOOK_URL` | `https://hooks.slack.com/services/...` | Slack Webhook URL |
+| Secret Name | 必須 | 値 | 説明 |
+|------------|:----:|------|------|
+| `NOTION_TOKEN` | ✅ | `secret_xxxx...` | Notion Integration トークン |
+| `DB_ID_PROPOSED` | ✅ | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` | 提案メニューテーブルのID（32文字） |
+| `DB_ID_RAW` | ✅ | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` | 実績入力テーブルのID（32文字） |
+| `DB_ID_STRUCTURED` | ✅ | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` | 実績履歴テーブルのID（32文字） |
+| `OPENAI_API_KEY` | ✅ | `sk-xxxx...` | OpenAI API キー |
+| `SLACK_WEBHOOK_URL` | ✅ | `https://hooks.slack.com/services/...` | Slack Webhook URL |
+| `USER_DIETARY_PREFERENCES` | - | （下記参照） | 食事の好み・制限（プライベート情報用） |
 
 ### 各値の取得方法
 
@@ -82,6 +83,27 @@ GitHub Actions で使用する環境変数は、すべて **GitHub Secrets** と
 - [Slack API](https://api.slack.com/apps) にアクセス
 - アプリの「Incoming Webhooks」から取得
 - 形式: `https://hooks.slack.com/services/` で始まる URL
+
+#### 5. USER_DIETARY_PREFERENCES（オプション）
+
+**プライバシーに関わる食事の好み・制限を設定するためのシークレットです。**
+
+アレルギー、健康状態、家族構成など、公開リポジトリのコードに書きたくない情報を安全に管理できます。
+
+**設定形式**：
+```
+- 妊婦がいるため生魚・生肉は避ける\n- 子供が食べやすい味付け\n- 辛いものは控える\n- 調理時間は30分以内
+```
+
+**注意点**：
+- 改行は `\n` で表現してください
+- ダブルクォートで囲む必要はありません
+- 設定しない場合はデフォルトの汎用的な好みが使用されます
+
+**設定例**：
+- `- 妊婦がいるため生魚は避ける\n- 塩分控えめ`
+- `- 乳製品アレルギーあり\n- グルテンフリー`
+- `- 高齢者向けの柔らかい料理\n- 減塩メニュー`
 
 ---
 
