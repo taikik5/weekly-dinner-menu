@@ -175,7 +175,7 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 
 **設定例**（`USER_DIETARY_PREFERENCES` シークレットに登録）：
 ```
-- 妊婦がいるため生魚・生肉は避ける\n- 子供が食べやすい味付けにする\n- 辛いものは控える\n- 調理時間は30分以内
+- 生魚・生肉は避ける\n- 子供が食べやすい味付けにする\n- 辛いものは控える\n- 調理時間は30分以内
 ```
 
 **注意点**：
@@ -247,7 +247,7 @@ python -m src.main daily
 **ローカル実行の場合**（`.env` ファイル）：
 ```bash
 # .env ファイルに追加
-USER_DIETARY_PREFERENCES="- 妊婦がいるため生魚・生肉は避ける\n- 子供が食べやすい味付け\n- 辛いものは控える"
+USER_DIETARY_PREFERENCES="- 生魚・生肉は避ける\n- 塩分控えめ\n- グルテンフリー"
 ```
 
 **GitHub Actions の場合**（GitHub Secrets）：
