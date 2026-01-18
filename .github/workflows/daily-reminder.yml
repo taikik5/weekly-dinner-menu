@@ -1,0 +1,48 @@
+name: Daily Reminder
+
+on:
+  schedule:
+    # 毎日 19:00 JST (= 10:00 UTC)
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: '対象日（YYYY-MM-DD形式、省略時は今日）'
+        required: false
+        type: string
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  send-reminder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Send daily reminder
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DB_ID_PROPOSED: ${{ secrets.DB_ID_PROPOSED }}
+          DB_ID_RAW: ${{ secrets.DB_ID_RAW }}
+          DB_ID_STRUCTURED: ${{ secrets.DB_ID_STRUCTURED }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "${{ github.event.inputs.target_date }}" ]; then
+            python -m src.main daily --date "${{ github.event.inputs.target_date }}"
+          else
+            python -m src.main daily
+          fi

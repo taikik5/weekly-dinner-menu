@@ -1,0 +1,23 @@
+[project]
+name = "dinner-aide"
+version = "1.0.0"
+description = "献立自動生成・管理システム"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+markers = [
+    "e2e: end-to-end tests",
+    "integration: integration tests",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]

@@ -1,0 +1,48 @@
+name: Weekly Menu Generation
+
+on:
+  schedule:
+    # 毎週土曜日 06:00 JST (= 金曜日 21:00 UTC)
+    - cron: '0 21 * * 5'
+  workflow_dispatch:
+    inputs:
+      reference_date:
+        description: '基準日（YYYY-MM-DD形式、省略時は今日）'
+        required: false
+        type: string
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  generate-menu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run weekly menu generation
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DB_ID_PROPOSED: ${{ secrets.DB_ID_PROPOSED }}
+          DB_ID_RAW: ${{ secrets.DB_ID_RAW }}
+          DB_ID_STRUCTURED: ${{ secrets.DB_ID_STRUCTURED }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "${{ github.event.inputs.reference_date }}" ]; then
+            python -m src.main weekly --date "${{ github.event.inputs.reference_date }}"
+          else
+            python -m src.main weekly
+          fi
