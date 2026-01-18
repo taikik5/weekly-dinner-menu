@@ -191,7 +191,7 @@ class SlackClientWrapper:
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": "🍴 今日のご飯はどうでしたか？",
+                    "text": "🍴 今日の実績を記録してください",
                     "emoji": True,
                 },
             },
@@ -203,7 +203,9 @@ class SlackClientWrapper:
             for item in today_menu:
                 category = item.get("category", "")
                 dish_name = item.get("dish_name", "")
-                dishes.append(f"• {category}: {dish_name}")
+                status = item.get("status", "提案")
+                status_emoji = self._get_status_emoji(status)
+                dishes.append(f"• {category}: {dish_name} {status_emoji}")
 
             dishes_text = "\n".join(dishes)
             blocks.append(
@@ -215,13 +217,24 @@ class SlackClientWrapper:
                     },
                 }
             )
+            blocks.append(
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "💡 提案  ✅ 確定  🍽️ 外食・予定あり",
+                        }
+                    ],
+                }
+            )
         else:
             blocks.append(
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"*{date_display}* の献立予定はありません。",
+                        "text": f"*{date_display}* の献立予定は登録されていません。",
                     },
                 }
             )
@@ -232,7 +245,16 @@ class SlackClientWrapper:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"実際に食べたものを記録してください！\n<{notion_url}|📝 Notionで実績を入力する>",
+                    "text": "予定通りでも、変更があっても、実際に食べたものを記録してください！\n次回の献立提案に活かされます。",
+                },
+            }
+        )
+        blocks.append(
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"<{notion_url}|📝 Notionで実績を入力する>",
                 },
             }
         )
