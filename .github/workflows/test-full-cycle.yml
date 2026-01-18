@@ -1,0 +1,87 @@
+name: Test Full Cycle (Development Only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      reset_data:
+        description: 'リセット対象 (all/proposed/raw/structured)'
+        required: false
+        default: 'all'
+        type: string
+
+env:
+  TZ: Asia/Tokyo
+  ENV: development
+
+jobs:
+  test-full-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Step 1: Reset database
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DB_ID_PROPOSED: ${{ secrets.DB_ID_PROPOSED }}
+          DB_ID_RAW: ${{ secrets.DB_ID_RAW }}
+          DB_ID_STRUCTURED: ${{ secrets.DB_ID_STRUCTURED }}
+        run: |
+          TABLES="${{ github.event.inputs.reset_data || 'all' }}"
+          if [ "$TABLES" = "all" ]; then
+            python -m src.main reset --tables proposed raw structured --force
+          else
+            python -m src.main reset --tables "$TABLES" --force
+          fi
+
+      - name: Step 2: Seed test data
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DB_ID_PROPOSED: ${{ secrets.DB_ID_PROPOSED }}
+          DB_ID_RAW: ${{ secrets.DB_ID_RAW }}
+          DB_ID_STRUCTURED: ${{ secrets.DB_ID_STRUCTURED }}
+        run: python -m src.main seed
+
+      - name: Step 3: Generate weekly menu
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DB_ID_PROPOSED: ${{ secrets.DB_ID_PROPOSED }}
+          DB_ID_RAW: ${{ secrets.DB_ID_RAW }}
+          DB_ID_STRUCTURED: ${{ secrets.DB_ID_STRUCTURED }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          USER_DIETARY_PREFERENCES: ${{ secrets.USER_DIETARY_PREFERENCES }}
+        run: python -m src.main weekly
+
+      - name: Step 4: Send daily reminder
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DB_ID_PROPOSED: ${{ secrets.DB_ID_PROPOSED }}
+          DB_ID_RAW: ${{ secrets.DB_ID_RAW }}
+          DB_ID_STRUCTURED: ${{ secrets.DB_ID_STRUCTURED }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          USER_DIETARY_PREFERENCES: ${{ secrets.USER_DIETARY_PREFERENCES }}
+        run: python -m src.main daily
+
+      - name: Test Summary
+        run: |
+          echo "✅ Test Cycle Completed"
+          echo "Steps executed:"
+          echo "  1. ✅ Reset database (ENV=development)"
+          echo "  2. ✅ Seed test data"
+          echo "  3. ✅ Generate weekly menu"
+          echo "  4. ✅ Send daily reminder"
+          echo ""
+          echo "Check Notion & Slack for verification"
